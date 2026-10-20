@@ -1,0 +1,25 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Backend API for DevEval project submission and review dashboard powered by Express, TypeScript, and Prisma.",
+  "main": "./dist/server.js",
+  "scripts": {
+    "start": "node ./dist/server.js",
+    "dev": "tsx watch ./src/server.ts",
+    "migrate": "prisma migrate dev",
+    "build": "prisma generate && tsc",
+    "lint": "eslint ./src"
+  },
+  "keywords": [
+    "deveval",
+    "typescript",
+    "express",
+    "prisma",
+    "postgresql",
+    "rbac",
+    "fullstack"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.20.0"
+}
