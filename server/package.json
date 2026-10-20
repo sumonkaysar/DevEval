@@ -1,14 +1,44 @@
 {
-  "name": "server",
+  "name": "deveval-server",
   "version": "1.0.0",
   "description": "Backend API for DevEval project submission and review dashboard powered by Express, TypeScript, and Prisma.",
   "main": "./dist/server.js",
+  "author": "SK",
+  "license": "ISC",
+  "packageManager": "pnpm@10.20.0",
   "scripts": {
     "start": "node ./dist/server.js",
     "dev": "tsx watch ./src/server.ts",
     "migrate": "prisma migrate dev",
     "build": "prisma generate && tsc",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "contract:emit": "prisma contract emit"
+  },
+  "dependencies": {
+    "@prisma/orm-postgres": "8.0.0-rc.18",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@prisma/cli-engine": "0.7.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "prisma": "8.0.0-rc.23",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.72.0"
   },
   "keywords": [
     "deveval",
@@ -18,8 +48,5 @@
     "postgresql",
     "rbac",
     "fullstack"
-  ],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.20.0"
+  ]
 }

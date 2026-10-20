@@ -1,0 +1,25 @@
+// use prisma-8
+
+enum Role {
+  STUDENT
+  MENTOR
+  ADMIN
+}
+
+model User {
+  id          String       @id @default(uuid())    
+  firstName   String
+  lastName    String
+  email       String       @unique
+  password    String   
+  role        Role         @default(STUDENT)
+
+  submissions Submission[] @relation("StudentSubmissions")
+  reviews     Submission[] @relation("MentorReviews")
+  feedbacks   Feedback[]   
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("users")
+}
