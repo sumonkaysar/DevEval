@@ -15,7 +15,7 @@ type IResponse<T> = {
   meta?: IMeta;
 };
 
-const sendResponse = <T>(res: Response, data: IResponse<T>) => {
+export const sendResponse = <T>(res: Response, data: IResponse<T>) => {
   res.status(data.statusCode).json({
     success: data.success,
     message: data.message,
@@ -23,5 +23,3 @@ const sendResponse = <T>(res: Response, data: IResponse<T>) => {
     meta: data.meta,
   });
 };
-
-export default sendResponse;

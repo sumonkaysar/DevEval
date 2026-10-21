@@ -5,7 +5,7 @@ import { AppError } from "../errors/AppError";
 import { handleZodError } from "../errors/handleZodError";
 import { TErrorSources } from "../types/error.types";
 
-const globalErrorHandler = (
+export const globalErrorHandler = (
   err: any,
   _req: Request,
   res: Response,
@@ -35,5 +35,3 @@ const globalErrorHandler = (
     stack: env.NODE_ENV === "development" ? err.stack : null,
   });
 };
-
-export default globalErrorHandler;

@@ -7,7 +7,7 @@ import { AppError } from "../errors/AppError";
 import { Role } from "../modules/user/user.type";
 import { verifyToken } from "../utils/jwt";
 
-const checkAuth = (...roles: Role[]) => {
+export const checkAuth = (...roles: Role[]) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       const accessToken = req.cookies.accessToken || req.headers.authorization;
@@ -40,5 +40,3 @@ const checkAuth = (...roles: Role[]) => {
     }
   };
 };
-
-export default checkAuth;
