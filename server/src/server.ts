@@ -1,13 +1,20 @@
 /* eslint-disable no-console */
 import { Server } from "http";
+import "temporal-polyfill/full/global";
 import app from "./app";
+import { env } from "./app/config/env.config";
+import { seedAdmin } from "./app/utils/seedAdmin";
+import { db } from "./prisma/db";
 
 let server: Server;
 
 const main = async () => {
   try {
-    server = app.listen(5000, () => {
-      console.log(`Server is on port ${5000}`);
+    await db.connect();
+    console.log("Database connected successfully");
+
+    server = app.listen(env.PORT, () => {
+      console.log(`Server is on port ${env.PORT}`);
     });
   } catch (err) {
     console.log(err);
@@ -17,58 +24,43 @@ const main = async () => {
 
 (async () => {
   await main();
+  await seedAdmin();
 })();
 
+const gracefulShutdown = async (message: string, err?: unknown) => {
+  console.log(message, err);
+
+  if (server) {
+    server.close(() => {
+      console.log("😈 Server is closed");
+      process.exit(1);
+    });
+  }
+  process.exit(1);
+};
+
 // Unhandled Rejection Error
-process.on("unhandledRejection", (err) => {
-  console.log(
+process.on("unhandledRejection", (err) =>
+  gracefulShutdown(
     `😈 Unhandled Rejection is detected, server is shutting down ...`,
     err,
-  );
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
-});
+  ),
+);
 
 // Uncaught Rejection Error
-process.on("uncaughtException", (err) => {
-  console.log(
-    `😈 Unhandled Exception is detected, server is shutting down ...`,
+process.on("uncaughtException", (err) =>
+  gracefulShutdown(
+    `😈 Uncaught Exception is detected, server is shutting down ...`,
     err,
-  );
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
-});
+  ),
+);
 
 // SIGTERM
-process.on("SIGTERM", () => {
-  console.log("😈 SIGTERM signal received, server is shutting down ...");
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
-});
+process.on("SIGTERM", () =>
+  gracefulShutdown("😈 SIGTERM signal received, server is shutting down ..."),
+);
 
 // SIGINT
-process.on("SIGINT", () => {
-  console.log("😈 SIGINT signal received, server is shutting down ...");
-
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  process.exit(1);
-});
+process.on("SIGINT", () =>
+  gracefulShutdown("😈 SIGINT signal received, server is shutting down ..."),
+);
