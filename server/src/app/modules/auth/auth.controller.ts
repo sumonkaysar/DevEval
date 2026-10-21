@@ -30,7 +30,7 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const logout = catchAsync(async (req: Request, res: Response) => {
+const logout = catchAsync(async (_req: Request, res: Response) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
     secure: true,
@@ -68,6 +68,28 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.forgotPassword(req.body.email);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Email sent successfully",
+    data: result,
+  });
+});
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.resetPassword(req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Password reset successfully",
+    data: result,
+  });
+});
+
 const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
 
@@ -92,5 +114,7 @@ export const AuthControllers = {
   credentialsLogin,
   logout,
   changePassword,
+  forgotPassword,
+  resetPassword,
   getNewAccessToken,
 };

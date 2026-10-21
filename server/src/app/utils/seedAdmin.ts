@@ -11,7 +11,7 @@ export const seedAdmin = async () => {
     }).first();
 
     if (isAdminExist) {
-      console.log(" admin already exists!");
+      console.log("Admin already exists!");
       return;
     }
 

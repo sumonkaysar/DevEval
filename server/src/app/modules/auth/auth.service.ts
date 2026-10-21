@@ -1,8 +1,14 @@
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
+import crypto from "crypto";
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { models } from "../../../prisma/db";
+import { env } from "../../config/env.config";
+import { redisClient } from "../../config/redis.config";
+import { urls } from "../../config/url.config";
 import { AppError } from "../../errors/AppError";
+import { forgotPasswordEmailTemplate } from "../../templates/forgotPasswordTemplate";
+import { sendEmail } from "../../utils/sendEmail";
 import {
   createNewAccessTokenWithRefreshToken,
   createUserTokens,
@@ -19,6 +25,11 @@ const registerUser = async (payload: TUser) => {
   if (payload.role === Role.ADMIN) {
     throw new AppError(StatusCodes.BAD_REQUEST, "You can't be Admin");
   }
+
+  payload.password = await hash(
+    payload.password,
+    Number(env.BCRYPTJS_SALT_ROUND),
+  );
 
   const user = await models.User.create(payload);
 
@@ -80,6 +91,69 @@ const changePassword = async (
   });
 };
 
+const forgotPassword = async (email: string) => {
+  const user = await models.User.where({ email }).first();
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  await redisClient.set(`password-reset:${resetToken}`, user.id, "EX", 3600);
+
+  const resetUrl = `${urls.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: "DevEval - Password Reset Request",
+    html: forgotPasswordEmailTemplate(
+      `${user.firstName} ${user.lastName}`,
+      resetUrl,
+    ),
+  });
+
+  return {
+    message: "Password reset token sent to email",
+  };
+};
+
+const resetPassword = async ({
+  token,
+  newPassword,
+}: {
+  token: string;
+  newPassword: string;
+}) => {
+  const userId = await redisClient.get(`password-reset:${token}`);
+
+  if (!userId) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Invalid or expired password reset token.",
+    );
+  }
+
+  const user = await models.User.where({ id: Number(userId) }).first();
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found.");
+  }
+
+  const hashedPassword = await hash(
+    newPassword,
+    Number(env.BCRYPTJS_SALT_ROUND),
+  );
+
+  await models.User.where({ id: user.id }).update({
+    password: hashedPassword,
+  });
+
+  await redisClient.del(`password-reset:${token}`);
+
+  return { message: "Password successfully reset." };
+};
+
 const getNewAccessToken = async (refreshToken: string) => {
   const accessToken = await createNewAccessTokenWithRefreshToken(refreshToken);
   return { accessToken };
@@ -89,5 +163,7 @@ export const AuthServices = {
   registerUser,
   credentialsLogin,
   changePassword,
+  forgotPassword,
+  resetPassword,
   getNewAccessToken,
 };

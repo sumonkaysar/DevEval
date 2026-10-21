@@ -33,6 +33,18 @@ const envFields = [
   "REFRESH_TOKEN_SECRET",
   "ACCESS_TOKEN_EXPIRES_IN",
   "REFRESH_TOKEN_EXPIRES_IN",
+
+  // SMTP gmail
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_USER",
+  "SMTP_PASS",
+
+  // redis
+  "REDIS_USER",
+  "REDIS_PASS",
+  "REDIS_PORT",
+  "REDIS_HOST",
 ] as const;
 
 type IEnv = Record<(typeof envFields)[number], string>;
