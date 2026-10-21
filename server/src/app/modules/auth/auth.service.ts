@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { models } from "../../../prisma/db";
 import { env } from "../../config/env.config";
-import { redisClient } from "../../config/redis.config";
+import { redis } from "../../config/redis.config";
 import { urls } from "../../config/url.config";
 import { AppError } from "../../errors/AppError";
 import { forgotPasswordEmailTemplate } from "../../templates/forgotPasswordTemplate";
@@ -100,7 +100,7 @@ const forgotPassword = async (email: string) => {
 
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  await redisClient.set(`password-reset:${resetToken}`, user.id, "EX", 3600);
+  await redis.set(`password-reset:${resetToken}`, user.id, "EX", 3600);
 
   const resetUrl = `${urls.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
@@ -125,7 +125,7 @@ const resetPassword = async ({
   token: string;
   newPassword: string;
 }) => {
-  const userId = await redisClient.get(`password-reset:${token}`);
+  const userId = await redis.get(`password-reset:${token}`);
 
   if (!userId) {
     throw new AppError(
@@ -149,7 +149,7 @@ const resetPassword = async ({
     password: hashedPassword,
   });
 
-  await redisClient.del(`password-reset:${token}`);
+  await redis.del(`password-reset:${token}`);
 
   return { message: "Password successfully reset." };
 };

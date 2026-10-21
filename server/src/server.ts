@@ -3,6 +3,7 @@ import { Server } from "http";
 import "temporal-polyfill/full/global";
 import app from "./app";
 import { env } from "./app/config/env.config";
+import { connectRedis } from "./app/config/redis.config";
 import { seedAdmin } from "./app/utils/seedAdmin";
 import { db } from "./prisma/db";
 
@@ -23,6 +24,7 @@ const main = async () => {
 };
 
 (async () => {
+  await connectRedis();
   await main();
   await seedAdmin();
 })();

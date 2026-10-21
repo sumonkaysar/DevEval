@@ -41,10 +41,7 @@ const envFields = [
   "SMTP_PASS",
 
   // redis
-  "REDIS_USER",
-  "REDIS_PASS",
-  "REDIS_PORT",
-  "REDIS_HOST",
+  "REDIS_URL",
 ] as const;
 
 type IEnv = Record<(typeof envFields)[number], string>;
