@@ -2,7 +2,7 @@
 import { hash } from "bcryptjs";
 import { models } from "../../prisma/db";
 import { env } from "../config/env.config";
-import { TCreateUserInput } from "../modules/user/user.type";
+import { Role, TCreateUserInput } from "../modules/user/user.type";
 
 export const seedAdmin = async () => {
   try {
@@ -27,6 +27,7 @@ export const seedAdmin = async () => {
       lastName: env.ADMIN_LAST_NAME,
       email: env.ADMIN_EMAIL,
       password: hashedPassword,
+      role: Role.ADMIN,
     };
 
     await models.User.create(data);
