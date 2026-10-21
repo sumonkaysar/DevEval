@@ -7,7 +7,23 @@ import {
   createNewAccessTokenWithRefreshToken,
   createUserTokens,
 } from "../../utils/userTokens";
-import { TUser } from "../user/user.type";
+import { Role, TUser } from "../user/user.type";
+
+const registerUser = async (payload: TUser) => {
+  const isUserExist = await models.User.where({ email: payload.email }).first();
+
+  if (isUserExist) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Email already registered");
+  }
+
+  if (payload.role === Role.ADMIN) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "You can't be Admin");
+  }
+
+  const user = await models.User.create(payload);
+
+  return user;
+};
 
 const credentialsLogin = async (payload: TUser) => {
   const isUserExist = await models.User.where({
@@ -37,7 +53,7 @@ const credentialsLogin = async (payload: TUser) => {
   };
 };
 
-const resetPassword = async (
+const changePassword = async (
   decoded: JwtPayload,
   newPassword: string,
   oldPassword: string,
@@ -70,7 +86,8 @@ const getNewAccessToken = async (refreshToken: string) => {
 };
 
 export const AuthServices = {
+  registerUser,
   credentialsLogin,
-  resetPassword,
+  changePassword,
   getNewAccessToken,
 };

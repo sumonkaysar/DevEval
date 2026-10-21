@@ -1,10 +1,21 @@
 import { Request, Response } from "express";
-import AppError from "../../errorHelpers/AppError";
-import catchAsync from "../../utils/catchAsync";
-import httpStatus from "../../utils/httpStatus";
-import sendResponse from "../../utils/sendResponse";
+import { StatusCodes } from "http-status-codes";
+import { AppError } from "../../errors/AppError";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 import { setAuthCookies } from "../../utils/setCookies";
 import { AuthServices } from "./auth.service";
+
+const registerUser = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.registerUser(req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    message: "User registered successfully",
+    data: result,
+  });
+});
 
 const credentialsLogin = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.credentialsLogin(req.body);
@@ -12,7 +23,7 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response) => {
   setAuthCookies(res, result);
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "User logged in successfully",
     data: result,
@@ -33,24 +44,24 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   });
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "User logged out successfully",
     data: null,
   });
 });
 
-const resetPassword = catchAsync(async (req: Request, res: Response) => {
+const changePassword = catchAsync(async (req: Request, res: Response) => {
   const decoded = req.user;
 
-  await AuthServices.resetPassword(
+  await AuthServices.changePassword(
     decoded,
     req.body.newPassword,
-    req.body.oldPassword
+    req.body.oldPassword,
   );
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "Password changed successfully",
     data: null,
@@ -61,7 +72,7 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
-    throw new AppError(httpStatus.BAD_REQUEST, "No refresh token received");
+    throw new AppError(StatusCodes.BAD_REQUEST, "No refresh token received");
   }
 
   const result = await AuthServices.getNewAccessToken(refreshToken);
@@ -69,7 +80,7 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
   setAuthCookies(res, result);
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "New access token retrieved succesfully",
     data: result,
@@ -77,8 +88,9 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const AuthControllers = {
+  registerUser,
   credentialsLogin,
   logout,
-  resetPassword,
+  changePassword,
   getNewAccessToken,
 };
